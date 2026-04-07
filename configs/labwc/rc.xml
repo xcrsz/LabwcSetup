@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<labwc_config>
+  <theme>
+    <name>Clearlooks-3.4</name>
+    <cornerRadius>8</cornerRadius>
+    <font name="sans" size="10" />
+  </theme>
+
+  <keyboard>
+    <default />
+
+    <keybind key="W-Return">
+      <action name="Execute" command="foot" />
+    </keybind>
+
+    <keybind key="W-space">
+      <action name="Execute" command="wofi --show drun" />
+    </keybind>
+
+    <keybind key="W-e">
+      <action name="Execute" command="pcmanfm" />
+    </keybind>
+
+    <keybind key="W-b">
+      <action name="Execute" command="librewolf" />
+    </keybind>
+
+    <keybind key="W-t">
+      <action name="Execute" command="geany" />
+    </keybind>
+
+    <keybind key="W-l">
+      <action name="Execute" command="swaylock" />
+    </keybind>
+  </keyboard>
+
+  <mouse>
+    <default />
+  </mouse>
+</labwc_config>
