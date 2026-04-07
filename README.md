@@ -2,9 +2,27 @@
 
 LabwcSetup is a terminal based assistant for setting up a Labwc desktop session on FreeBSD and GhostBSD. It follows the same general idea as NiriSetup, but replaces the compositor specific package list and configuration model with a Labwc oriented one.
 
-## What this variant changes
+## Base used for the menu
 
-This version swaps the original Niri focused components for the following Labwc oriented stack:
+This project's `menu.xml` is adapted from the Joborun style Labwc menu structure you provided, but cleaned up for FreeBSD and GhostBSD use. The general structure is preserved:
+
+* `client-menu`
+* `root-menu`
+* a nested configuration submenu
+* a power submenu
+
+The Linux centric parts were removed or replaced:
+
+* Joborun branding and icon paths were removed
+* `gmrun` was replaced with `wofi`
+* `leafpad` usage was normalized to `geany`
+* Conky specific items were removed
+* distro specific web links were removed
+* power actions were changed to FreeBSD oriented commands
+
+## Package stack
+
+This build targets the following stack:
 
 * Bar: `sfwbar`
 * Launcher: `wofi`
@@ -27,16 +45,54 @@ Most of the overall flow can be reused:
 
 The main compositor specific change is configuration deployment. Niri used a single `config.kdl` file. Labwc uses a config directory under `~/.config/labwc/`.
 
-## Labwc configuration files used here
+## Installed Labwc configuration
 
-This project installs the following starter files into `~/.config/labwc/`:
+This project installs the following files into `~/.config/labwc/`:
 
 * `rc.xml`
+* `menu.xml`
 * `autostart`
 * `environment`
 * `backgrounds/dark_blue_bg.png`
 
-This matches Labwc's documented configuration model. Labwc can also use `menu.xml`, `shutdown`, and `xinitrc`, but they are not required for this starter build.
+## Behavior of the shipped configuration
+
+### Key bindings
+
+* `W-Return` launches `foot`
+* `W-space` launches `wofi --show drun`
+* `W-e` launches `pcmanfm`
+* `W-b` launches `librewolf`
+* `W-t` launches `geany`
+* `W-l` launches `swaylock`
+
+### Autostart
+
+The autostart file does the following:
+
+* starts `mako`
+* starts `sfwbar`
+* starts `swaybg` with the bundled dark blue background
+* starts `swayidle`
+* locks the screen after 5 minutes
+* powers displays off after another 5 minutes with `wlopm`
+* restores displays on resume
+
+### Root menu
+
+The root menu includes:
+
+* browser
+* terminal
+* launcher
+* file manager
+* text editor
+* screenshot capture
+* lock screen
+* bar start and stop
+* configuration editing entries
+* reconfigure action
+* power submenu for `shutdown -p now`, `reboot`, and `zzz`
 
 ## Build
 
@@ -59,27 +115,6 @@ go build -o LabwcSetup .
 ./LabwcSetup
 ```
 
-
-The autostart file now also includes a background setup and idle management block:
-
-* `swaybg` starts with the included `backgrounds/dark_blue_bg.png` wallpaper by default
-* `swayidle` locks the screen after 5 minutes
-* `wlopm` turns displays off after another 5 minutes and restores them on resume
-* `swaylock` is used for both idle locking and before sleep
-
-Adjust the `swaybg` line in `configs/labwc/autostart` if you want to use a different wallpaper or switch back to a solid color.
-
-## Menu actions
-
-LabwcSetup provides these actions:
-
-1. `Install Labwc`
-2. `Setup System`
-3. `Install Default Config`
-4. `Verify Setup`
-5. `Save Logs`
-6. `Exit`
-
 ## Starting Labwc manually
 
 After package installation and system setup, you can start Labwc from a TTY with:
@@ -90,19 +125,16 @@ LIBSEAT_BACKEND=consolekit2 ck-launch-session dbus-launch labwc
 
 ## Notes for GhostBSD
 
-GhostBSD already carries some of the base Wayland related pieces, so the package installation step may report that some items are already installed. That is expected.
+GhostBSD may already include some of the supporting Wayland packages and services. That is expected. The setup step may therefore report that some components are already present.
 
-## Config bundle summary
+The power actions in `menu.xml` assume a privilege model that allows the chosen commands to run. If your GhostBSD setup uses `sudo`, `doas`, or another helper, adjust those menu entries to match local policy.
 
-The shipped config does the following:
+## Menu customization notes
 
-* `W-Return` launches `foot`
-* `W-space` launches `wofi --show drun`
-* `W-e` launches `pcmanfm`
-* `W-b` launches `librewolf`
-* `W-t` launches `geany`
-* `W-l` launches `swaylock`
-* `autostart` starts `mako`, `sfwbar`, `swaybg`, and `swayidle` using the included dark blue wallpaper
+If you want to switch from `geany` to `leafpad`, update both:
+
+* the `defaultEditor` constant in `LabwcSetup.go`
+* the `Text Editor` and `edit ...` entries in `configs/labwc/menu.xml`
 
 ## Logs
 

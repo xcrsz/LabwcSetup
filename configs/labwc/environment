@@ -1,6 +1,4 @@
-#!/bin/sh
-
-XDG_CURRENT_DESKTOP=labwc
-XDG_SESSION_DESKTOP=labwc
-XDG_SESSION_TYPE=wayland
-GTK_USE_PORTAL=1
+export XDG_CURRENT_DESKTOP=labwc
+export XDG_SESSION_DESKTOP=labwc
+export XDG_SESSION_TYPE=wayland
+export GTK_USE_PORTAL=1

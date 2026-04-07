@@ -2,6 +2,8 @@ package main
 
 import (
     "fmt"
+    "io"
+    "io/fs"
     "os"
     "os/exec"
     "path/filepath"
@@ -84,9 +86,7 @@ func clearScreen() {
     _ = cmd.Run()
 }
 
-func (m model) Init() tea.Cmd {
-    return nil
-}
+func (m model) Init() tea.Cmd { return nil }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
     switch msg := msg.(type) {
@@ -447,7 +447,7 @@ func installLabwcConfig() tea.Cmd {
             return statusMsg{status: err.Error(), err: err}
         }
 
-        copied, copyErr := copyDirContents(srcDir, destDir)
+        copied, copyErr := copyDirRecursive(srcDir, destDir)
         if copyErr != nil {
             return statusMsg{status: fmt.Sprintf("Failed to install Labwc configuration: %v", copyErr), err: copyErr}
         }
@@ -456,7 +456,7 @@ func installLabwcConfig() tea.Cmd {
             fmt.Sprintf("Installed Labwc configuration into %s", destDir),
             fmt.Sprintf("Copied files: %s", strings.Join(copied, ", ")),
             "",
-            "You can reload the compositor after editing rc.xml with:",
+            "You can reload the compositor after editing rc.xml or menu.xml with:",
             "  labwc --reconfigure",
         }
         return statusMsg{status: strings.Join(msg, "\n")}
@@ -472,8 +472,10 @@ func verifyLabwcSetup() tea.Cmd {
 
         requiredFiles := []string{
             filepath.Join(homeDir, ".config", "labwc", "rc.xml"),
+            filepath.Join(homeDir, ".config", "labwc", "menu.xml"),
             filepath.Join(homeDir, ".config", "labwc", "autostart"),
             filepath.Join(homeDir, ".config", "labwc", "environment"),
+            filepath.Join(homeDir, ".config", "labwc", "backgrounds", "dark_blue_bg.png"),
         }
 
         requiredCommands := []string{
@@ -559,40 +561,68 @@ func findBundledConfigDir() (string, error) {
     return "", fmt.Errorf("could not locate configs/labwc next to executable or in current directory")
 }
 
-func copyDirContents(srcDir, destDir string) ([]string, error) {
-    entries, err := os.ReadDir(srcDir)
-    if err != nil {
-        return nil, err
-    }
-
+func copyDirRecursive(srcDir, destDir string) ([]string, error) {
     var copied []string
-    for _, entry := range entries {
-        if entry.IsDir() {
-            continue
-        }
 
-        srcPath := filepath.Join(srcDir, entry.Name())
-        destPath := filepath.Join(destDir, entry.Name())
-
-        data, err := os.ReadFile(srcPath)
+    err := filepath.WalkDir(srcDir, func(path string, d fs.DirEntry, err error) error {
         if err != nil {
-            return copied, err
+            return err
         }
 
-        mode := os.FileMode(0644)
-        if entry.Name() == "autostart" || entry.Name() == "environment" {
-            mode = 0755
+        rel, err := filepath.Rel(srcDir, path)
+        if err != nil {
+            return err
+        }
+        if rel == "." {
+            return nil
         }
 
-        if err := os.WriteFile(destPath, data, mode); err != nil {
-            return copied, err
+        target := filepath.Join(destDir, rel)
+        if d.IsDir() {
+            return os.MkdirAll(target, 0755)
         }
 
-        copied = append(copied, entry.Name())
+        if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil {
+            return err
+        }
+
+        if err := copyFile(path, target); err != nil {
+            return err
+        }
+        copied = append(copied, rel)
+        return nil
+    })
+    if err != nil {
+        return copied, err
     }
 
     sort.Strings(copied)
     return copied, nil
+}
+
+func copyFile(srcPath, destPath string) error {
+    in, err := os.Open(srcPath)
+    if err != nil {
+        return err
+    }
+    defer in.Close()
+
+    info, err := in.Stat()
+    if err != nil {
+        return err
+    }
+
+    mode := info.Mode()
+    out, err := os.OpenFile(destPath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, mode.Perm())
+    if err != nil {
+        return err
+    }
+    defer out.Close()
+
+    if _, err := io.Copy(out, in); err != nil {
+        return err
+    }
+    return nil
 }
 
 func saveLogsToFile(m model) tea.Cmd {

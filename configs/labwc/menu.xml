@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<labwc_menu>
+  <menu id="client-menu">
+    <item label="Minimize">
+      <action name="Iconify" />
+    </item>
+    <item label="Maximize">
+      <action name="ToggleMaximize" />
+    </item>
+    <item label="Fullscreen">
+      <action name="ToggleFullscreen" />
+    </item>
+    <item label="Roll Up/Down">
+      <action name="ToggleShade" />
+    </item>
+    <item label="Decorations">
+      <action name="ToggleDecorations" />
+    </item>
+    <item label="Always on Top">
+      <action name="ToggleAlwaysOnTop" />
+    </item>
+    <menu id="workspaces" label="Workspace">
+      <item label="Move Left">
+        <action name="SendToDesktop" to="left" />
+      </item>
+      <item label="Move Right">
+        <action name="SendToDesktop" to="right" />
+      </item>
+      <separator />
+      <item label="Always on Visible Workspace">
+        <action name="ToggleOmnipresent" />
+      </item>
+    </menu>
+    <item label="Close">
+      <action name="Close" />
+    </item>
+  </menu>
+
+  <menu id="root-menu" label="GhostBSD Labwc">
+    <separator label="Applications" />
+
+    <item label="Web Browser">
+      <action name="Execute" command="librewolf" />
+    </item>
+    <item label="Terminal">
+      <action name="Execute" command="foot" />
+    </item>
+    <item label="Launcher">
+      <action name="Execute" command="wofi --show drun" />
+    </item>
+    <item label="File Manager">
+      <action name="Execute" command="pcmanfm" />
+    </item>
+    <item label="Text Editor">
+      <action name="Execute" command="geany" />
+    </item>
+
+    <separator label="Desktop" />
+
+    <item label="Task Bar On">
+      <action name="Execute" command="sfwbar" />
+    </item>
+    <item label="Task Bar Off">
+      <action name="Execute" command="killall sfwbar" />
+    </item>
+    <item label="Lock Screen">
+      <action name="Execute" command="swaylock -f -c 000000" />
+    </item>
+    <item label="Take Region Screenshot">
+      <action name="Execute" command="mkdir -p $HOME/Pictures/Screenshots &amp;&amp; grim -g &quot;$(slurp)&quot; $HOME/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png" />
+    </item>
+
+    <separator label="Labwc" />
+
+    <menu id="labwc-config" label="Labwc Config">
+      <item label="Edit autostart">
+        <action name="Execute" command="geany $HOME/.config/labwc/autostart" />
+      </item>
+      <item label="Edit menu.xml">
+        <action name="Execute" command="geany $HOME/.config/labwc/menu.xml" />
+      </item>
+      <item label="Edit rc.xml">
+        <action name="Execute" command="geany $HOME/.config/labwc/rc.xml" />
+      </item>
+      <item label="Edit environment">
+        <action name="Execute" command="geany $HOME/.config/labwc/environment" />
+      </item>
+      <item label="Open backgrounds folder">
+        <action name="Execute" command="pcmanfm $HOME/.config/labwc/backgrounds" />
+      </item>
+      <item label="Apply changes">
+        <action name="Reconfigure" />
+      </item>
+    </menu>
+
+    <separator label="Power" />
+
+    <menu id="power" label="Power">
+      <item label="Poweroff">
+        <action name="Execute" command="sudo shutdown -p now" />
+      </item>
+      <item label="Reboot">
+        <action name="Execute" command="sudo reboot" />
+      </item>
+      <item label="Suspend">
+        <action name="Execute" command="sudo zzz" />
+      </item>
+      <separator label="Session" />
+      <item label="Exit Labwc">
+        <action name="Exit" />
+      </item>
+    </menu>
+  </menu>
+</labwc_menu>

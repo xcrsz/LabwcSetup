@@ -1,4 +1,4 @@
-<?xml version="1.0" ?>
+<?xml version="1.0"?>
 <labwc_config>
   <theme>
     <name>Clearlooks-3.4</name>
@@ -30,7 +30,7 @@
     </keybind>
 
     <keybind key="W-l">
-      <action name="Execute" command="swaylock" />
+      <action name="Execute" command="swaylock -f -c 000000" />
     </keybind>
   </keyboard>
 
