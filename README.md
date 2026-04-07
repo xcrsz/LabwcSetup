@@ -25,7 +25,11 @@ Testing found four practical requirements:
 3. copy the Labwc config directory into `~/.config/labwc`
 4. use shell wrapped commands in `menu.xml` so home directory paths expand correctly
 
-The setup step in this project adds the current user to the `video` group and enables the supporting services. After group membership changes, log out and back in.
+This revision also fixes an earlier installer bug where running the setup as root could place configuration under `/root/.config/labwc`. The installer now resolves the invoking user and installs the Labwc config into that user's home directory instead.
+
+The setup step in this project adds the target user to the `video` group and enables the supporting services. After group membership changes, log out and back in.
+
+If the tool is run with `sudo`, package and system actions can still succeed, but the configuration install step now targets the invoking user's home directory and resets ownership so files do not remain owned by root.
 
 ## Installed Labwc configuration
 
@@ -96,9 +100,13 @@ go build -o LabwcSetup .
 
 ## Run
 
+Run as a normal user when possible:
+
 ```sh
 ./LabwcSetup
 ```
+
+If you choose to invoke it with `sudo`, the installer will now place configuration in the invoking user's `~/.config/labwc` rather than `/root/.config/labwc`.
 
 ## Starting Labwc manually
 

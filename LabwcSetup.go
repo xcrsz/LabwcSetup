@@ -6,8 +6,10 @@ import (
     "io/fs"
     "os"
     "os/exec"
+    "os/user"
     "path/filepath"
     "sort"
+    "strconv"
     "strings"
     "syscall"
 
@@ -64,6 +66,55 @@ type model struct {
 type statusMsg struct {
     status string
     err    error
+}
+
+func getTargetUsername() string {
+    if sudoUser := os.Getenv("SUDO_USER"); sudoUser != "" {
+        return sudoUser
+    }
+    if logname := os.Getenv("LOGNAME"); logname != "" {
+        return logname
+    }
+    if u, err := user.Current(); err == nil {
+        return u.Username
+    }
+    return ""
+}
+
+func getTargetHome() (string, error) {
+    if username := getTargetUsername(); username != "" {
+        if u, err := user.Lookup(username); err == nil && u.HomeDir != "" {
+            return u.HomeDir, nil
+        }
+    }
+    return os.UserHomeDir()
+}
+
+func chownRecursive(path, username string) error {
+    if username == "" {
+        return nil
+    }
+
+    u, err := user.Lookup(username)
+    if err != nil {
+        return err
+    }
+
+    uid, err := strconv.Atoi(u.Uid)
+    if err != nil {
+        return err
+    }
+    gid, err := strconv.Atoi(u.Gid)
+    if err != nil {
+        return err
+    }
+
+    return filepath.Walk(path, func(p string, info os.FileInfo, err error) error {
+        if err != nil {
+            return err
+        }
+        return os.Chown(p, uid, gid)
+    })
 }
 
 func initialModel() model {
@@ -334,10 +385,7 @@ func setupSystem() tea.Cmd {
             }
         }
 
-        currentUser := os.Getenv("USER")
-        if currentUser == "" {
-            currentUser = os.Getenv("LOGNAME")
-        }
+        currentUser := getTargetUsername()
         if currentUser != "" {
             cmd := exec.Command("sudo", "pw", "groupmod", "video", "-m", currentUser)
             out, err := cmd.CombinedOutput()
@@ -371,7 +419,7 @@ func setupSystem() tea.Cmd {
             logs = append(logs, "Persisting DRM module to boot: OK")
         }
 
-        homeDir, homeErr := os.UserHomeDir()
+        homeDir, homeErr := getTargetHome()
         if homeErr != nil {
             logs = append(logs, fmt.Sprintf("Warning: Could not determine home directory: %v", homeErr))
         } else {
@@ -434,7 +482,7 @@ func setupSystem() tea.Cmd {
 
 func installLabwcConfig() tea.Cmd {
     return func() tea.Msg {
-        homeDir, err := os.UserHomeDir()
+        homeDir, err := getTargetHome()
         if err != nil {
             return statusMsg{status: "Failed to determine home directory", err: err}
         }
@@ -454,6 +502,13 @@ func installLabwcConfig() tea.Cmd {
             return statusMsg{status: fmt.Sprintf("Failed to install Labwc configuration: %v", copyErr), err: copyErr}
         }
 
+        ownerUser := getTargetUsername()
+        if os.Geteuid() == 0 && ownerUser != "" {
+            if err := chownRecursive(destDir, ownerUser); err != nil {
+                return statusMsg{status: fmt.Sprintf("Installed Labwc configuration into %s, but failed to set ownership for %s: %v", destDir, ownerUser, err), err: err}
+            }
+        }
+
         msg := []string{
             fmt.Sprintf("Installed Labwc configuration into %s", destDir),
             fmt.Sprintf("Copied files: %s", strings.Join(copied, ", ")),
@@ -467,7 +522,7 @@ func installLabwcConfig() tea.Cmd {
 
 func verifyLabwcSetup() tea.Cmd {
     return func() tea.Msg {
-        homeDir, err := os.UserHomeDir()
+        homeDir, err := getTargetHome()
         if err != nil {
             return statusMsg{status: "Failed to determine home directory", err: err}
         }
