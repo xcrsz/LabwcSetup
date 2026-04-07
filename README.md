@@ -1,49 +1,31 @@
 # LabwcSetup
 
-LabwcSetup is a terminal based assistant for setting up a Labwc desktop session on FreeBSD and GhostBSD. It follows the same general idea as NiriSetup, but replaces the compositor specific package list and configuration model with a Labwc oriented one.
+LabwcSetup is a terminal based assistant for setting up a Labwc desktop session on FreeBSD and GhostBSD. It started from the NiriSetup model, but is adapted for Labwc and for GhostBSD specific behavior reported during testing.
 
-## Base used for the menu
+## Current package stack
 
-This project's `menu.xml` is adapted from the Joborun style Labwc menu structure you provided, but cleaned up for FreeBSD and GhostBSD use. The general structure is preserved:
+This build now targets the following stack:
 
-* `client-menu`
-* `root-menu`
-* a nested configuration submenu
-* a power submenu
-
-The Linux centric parts were removed or replaced:
-
-* Joborun branding and icon paths were removed
-* `gmrun` was replaced with `wofi`
-* `leafpad` usage was normalized to `geany`
-* Conky specific items were removed
-* distro specific web links were removed
-* power actions were changed to FreeBSD oriented commands
-
-## Package stack
-
-This build targets the following stack:
-
-* Bar: `sfwbar`
+* Bar: `waybar`
+* Audio control helper: `pavucontrol`
 * Launcher: `wofi`
 * Terminal: `foot`
 * File manager: `pcmanfm`
 * Text editor: `geany`
 * Browser: `librewolf`
-* Extras: `grim`, `slurp`, `swaybg`, `swayidle`, `swaylock`, `wlopm`, `mako`
+* Notifications: `mako`
+* Extras: `grim`, `slurp`, `swaybg`, `swayidle`, `swaylock`, `wlopm`
 
-The default editor in this build is `geany`. If you prefer `leafpad`, replace the `defaultEditor` constant in `LabwcSetup.go` before building.
+## Important GhostBSD and FreeBSD notes
 
-## What is reused conceptually from NiriSetup
+Testing found four practical requirements:
 
-Most of the overall flow can be reused:
+1. add the user to the `video` group
+2. uncomment `pam_xdg` in `/etc/pam.d/system`
+3. copy the Labwc config directory into `~/.config/labwc`
+4. use shell wrapped commands in `menu.xml` so home directory paths expand correctly
 
-* package installation through `pkg`
-* system setup for `dbus`, `seatd`, `pam_xdg`, `drm`, and `video` group membership
-* runtime directory preparation for Wayland sessions
-* log saving
-
-The main compositor specific change is configuration deployment. Niri used a single `config.kdl` file. Labwc uses a config directory under `~/.config/labwc/`.
+The setup step in this project adds the current user to the `video` group and enables the supporting services. After group membership changes, log out and back in.
 
 ## Installed Labwc configuration
 
@@ -71,7 +53,7 @@ This project installs the following files into `~/.config/labwc/`:
 The autostart file does the following:
 
 * starts `mako`
-* starts `sfwbar`
+* starts `waybar`
 * starts `swaybg` with the bundled dark blue background
 * starts `swayidle`
 * locks the screen after 5 minutes
@@ -87,12 +69,15 @@ The root menu includes:
 * launcher
 * file manager
 * text editor
+* audio control with `pavucontrol`
 * screenshot capture
 * lock screen
 * bar start and stop
 * configuration editing entries
 * reconfigure action
-* power submenu for `shutdown -p now`, `reboot`, and `zzz`
+* exit Labwc
+
+The power submenu was removed because GhostBSD does not assume passwordless `sudo`, and the earlier `zzz` based entry was not appropriate as a default.
 
 ## Build
 
@@ -120,21 +105,10 @@ go build -o LabwcSetup .
 After package installation and system setup, you can start Labwc from a TTY with:
 
 ```sh
-LIBSEAT_BACKEND=consolekit2 ck-launch-session dbus-launch labwc
+ck-launch-session dbus-launch labwc
 ```
 
-## Notes for GhostBSD
-
-GhostBSD may already include some of the supporting Wayland packages and services. That is expected. The setup step may therefore report that some components are already present.
-
-The power actions in `menu.xml` assume a privilege model that allows the chosen commands to run. If your GhostBSD setup uses `sudo`, `doas`, or another helper, adjust those menu entries to match local policy.
-
-## Menu customization notes
-
-If you want to switch from `geany` to `leafpad`, update both:
-
-* the `defaultEditor` constant in `LabwcSetup.go`
-* the `Text Editor` and `edit ...` entries in `configs/labwc/menu.xml`
+If `pam_xdg` is enabled and the user is in the `video` group, Labwc should start without `sudo`.
 
 ## Logs
 

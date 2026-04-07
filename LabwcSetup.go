@@ -28,6 +28,7 @@ const (
     menuItemWidth = 32
     logFileName   = "labwcsetup.log"
     defaultEditor = "geany"
+    defaultBar    = "waybar"
 )
 
 var (
@@ -252,7 +253,8 @@ func installLabwc() tea.Cmd {
             "seatd",
             "pam_xdg",
             "labwc",
-            "sfwbar",
+            "waybar",
+            "pavucontrol",
             "wofi",
             "foot",
             "pcmanfm",
@@ -480,11 +482,13 @@ func verifyLabwcSetup() tea.Cmd {
 
         requiredCommands := []string{
             "labwc",
-            "sfwbar",
+            "waybar",
+            "pavucontrol",
             "wofi",
             "foot",
             "pcmanfm",
             "librewolf",
+            "pavucontrol",
             defaultEditor,
             "grim",
             "slurp",

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 mako >/dev/null 2>&1 &
-sfwbar >/dev/null 2>&1 &
+waybar >/dev/null 2>&1 &
 
 # Set background image.
 # The default background is installed with this project.
@@ -9,8 +9,4 @@ swaybg -i "$HOME/.config/labwc/backgrounds/dark_blue_bg.png" -m fill >/dev/null 
 
 # Lock screen after 5 minutes; turn off display after another 5 minutes.
 # wlopm is used instead of disabling outputs directly.
-swayidle -w \
-  timeout 300 'swaylock -f -c 000000' \
-  timeout 600 'wlopm --off *' \
-  resume 'wlopm --on *' \
-  before-sleep 'swaylock -f -c 000000' >/dev/null 2>&1 &
+swayidle -w   timeout 300 'swaylock -f -c 000000'   timeout 600 'wlopm --off *'   resume 'wlopm --on *'   before-sleep 'swaylock -f -c 000000' >/dev/null 2>&1 &

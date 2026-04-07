@@ -54,61 +54,52 @@
     <item label="Text Editor">
       <action name="Execute" command="geany" />
     </item>
+    <item label="Audio Control">
+      <action name="Execute" command="pavucontrol" />
+    </item>
 
     <separator label="Desktop" />
 
-    <item label="Task Bar On">
-      <action name="Execute" command="sfwbar" />
+    <item label="Waybar On">
+      <action name="Execute" command="waybar" />
     </item>
-    <item label="Task Bar Off">
-      <action name="Execute" command="killall sfwbar" />
+    <item label="Waybar Off">
+      <action name="Execute" command="killall waybar" />
     </item>
     <item label="Lock Screen">
       <action name="Execute" command="swaylock -f -c 000000" />
     </item>
     <item label="Take Region Screenshot">
-      <action name="Execute" command="mkdir -p $HOME/Pictures/Screenshots &amp;&amp; grim -g &quot;$(slurp)&quot; $HOME/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png" />
+      <action name="Execute" command="sh -lc 'mkdir -p &quot;$HOME/Pictures/Screenshots&quot; &amp;&amp; grim -g &quot;$(slurp)&quot; &quot;$HOME/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png&quot;'" />
     </item>
 
     <separator label="Labwc" />
 
     <menu id="labwc-config" label="Labwc Config">
       <item label="Edit autostart">
-        <action name="Execute" command="geany $HOME/.config/labwc/autostart" />
+        <action name="Execute" command="sh -lc 'geany &quot;$HOME/.config/labwc/autostart&quot;'" />
       </item>
       <item label="Edit menu.xml">
-        <action name="Execute" command="geany $HOME/.config/labwc/menu.xml" />
+        <action name="Execute" command="sh -lc 'geany &quot;$HOME/.config/labwc/menu.xml&quot;'" />
       </item>
       <item label="Edit rc.xml">
-        <action name="Execute" command="geany $HOME/.config/labwc/rc.xml" />
+        <action name="Execute" command="sh -lc 'geany &quot;$HOME/.config/labwc/rc.xml&quot;'" />
       </item>
       <item label="Edit environment">
-        <action name="Execute" command="geany $HOME/.config/labwc/environment" />
+        <action name="Execute" command="sh -lc 'geany &quot;$HOME/.config/labwc/environment&quot;'" />
       </item>
       <item label="Open backgrounds folder">
-        <action name="Execute" command="pcmanfm $HOME/.config/labwc/backgrounds" />
+        <action name="Execute" command="sh -lc 'pcmanfm &quot;$HOME/.config/labwc/backgrounds&quot;'" />
       </item>
       <item label="Apply changes">
         <action name="Reconfigure" />
       </item>
     </menu>
 
-    <separator label="Power" />
+    <separator label="Session" />
 
-    <menu id="power" label="Power">
-      <item label="Poweroff">
-        <action name="Execute" command="sudo shutdown -p now" />
-      </item>
-      <item label="Reboot">
-        <action name="Execute" command="sudo reboot" />
-      </item>
-      <item label="Suspend">
-        <action name="Execute" command="sudo zzz" />
-      </item>
-      <separator label="Session" />
-      <item label="Exit Labwc">
-        <action name="Exit" />
-      </item>
-    </menu>
+    <item label="Exit Labwc">
+      <action name="Exit" />
+    </item>
   </menu>
 </labwc_menu>
