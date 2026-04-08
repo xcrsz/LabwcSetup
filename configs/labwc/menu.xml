@@ -70,26 +70,26 @@
       <action name="Execute" command="swaylock -f -c 000000" />
     </item>
     <item label="Take Region Screenshot">
-      <action name="Execute" command="sh -lc 'mkdir -p &quot;$HOME/Pictures/Screenshots&quot; &amp;&amp; grim -g &quot;$(slurp)&quot; &quot;$HOME/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png&quot;'" />
+      <action name="Execute" command="sh -c 'mkdir -p &quot;$HOME/Pictures/Screenshots&quot; &amp;&amp; grim -g &quot;$(slurp)&quot; &quot;$HOME/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png&quot;'" />
     </item>
 
     <separator label="Labwc" />
 
     <menu id="labwc-config" label="Labwc Config">
       <item label="Edit autostart">
-        <action name="Execute" command="sh -lc 'geany &quot;$HOME/.config/labwc/autostart&quot;'" />
+        <action name="Execute" command="sh -c 'geany &quot;$HOME/.config/labwc/autostart&quot;'" />
       </item>
       <item label="Edit menu.xml">
-        <action name="Execute" command="sh -lc 'geany &quot;$HOME/.config/labwc/menu.xml&quot;'" />
+        <action name="Execute" command="sh -c 'geany &quot;$HOME/.config/labwc/menu.xml&quot;'" />
       </item>
       <item label="Edit rc.xml">
-        <action name="Execute" command="sh -lc 'geany &quot;$HOME/.config/labwc/rc.xml&quot;'" />
+        <action name="Execute" command="sh -c 'geany &quot;$HOME/.config/labwc/rc.xml&quot;'" />
       </item>
       <item label="Edit environment">
-        <action name="Execute" command="sh -lc 'geany &quot;$HOME/.config/labwc/environment&quot;'" />
+        <action name="Execute" command="sh -c 'geany &quot;$HOME/.config/labwc/environment&quot;'" />
       </item>
       <item label="Open backgrounds folder">
-        <action name="Execute" command="sh -lc 'pcmanfm &quot;$HOME/.config/labwc/backgrounds&quot;'" />
+        <action name="Execute" command="sh -c 'pcmanfm &quot;$HOME/.config/labwc/backgrounds&quot;'" />
       </item>
       <item label="Apply changes">
         <action name="Reconfigure" />

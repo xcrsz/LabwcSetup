@@ -182,7 +182,7 @@ The right-click root menu provides:
 Notes:
 
 * Power management entries are intentionally removed for GhostBSD compatibility
-* Commands are executed via `sh -lc` for correct environment handling
+* Commands are executed via `sh -c` for correct environment handling
 
 ---
 
