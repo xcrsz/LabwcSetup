@@ -1,39 +1,137 @@
 # LabwcSetup
 
-LabwcSetup is a terminal based assistant for setting up a Labwc desktop session on FreeBSD and GhostBSD. It started from the NiriSetup model, but is adapted for Labwc and for GhostBSD specific behavior reported during testing.
+LabwcSetup is a minimal setup utility for configuring a Labwc-based Wayland desktop on FreeBSD and GhostBSD.
 
-## Current package stack
+It installs required packages, prepares the system environment, and deploys a working Labwc configuration using a simple, reproducible layout.
 
-This build now targets the following stack:
+This project intentionally avoids unnecessary components and focuses on a clean, functional compositor stack.
 
-* Bar: `waybar`
-* Audio control helper: `pavucontrol`
-* Launcher: `wofi`
-* Terminal: `foot`
-* File manager: `pcmanfm`
-* Text editor: `geany`
-* Browser: `librewolf`
-* Notifications: `mako`
-* Extras: `grim`, `slurp`, `swaybg`, `swayidle`, `swaylock`, `wlopm`
+---
 
-## Important GhostBSD and FreeBSD notes
+## Profiles
 
-Testing found four practical requirements:
+LabwcSetup supports two installation profiles:
 
-1. add the user to the `video` group
-2. uncomment `pam_xdg` in `/etc/pam.d/system`
-3. copy the Labwc config directory into `~/.config/labwc`
-4. use shell wrapped commands in `menu.xml` so home directory paths expand correctly
+### Minimal Profile
 
-This revision also fixes an earlier installer bug where running the setup as root could place configuration under `/root/.config/labwc`. The installer now resolves the invoking user and installs the Labwc config into that user's home directory instead.
+A lightweight, essential environment:
 
-The setup step in this project adds the target user to the `video` group and enables the supporting services. After group membership changes, log out and back in.
+* labwc
+* foot (terminal)
+* wofi (launcher)
 
-If the tool is run with `sudo`, package and system actions can still succeed, but the configuration install step now targets the invoking user's home directory and resets ownership so files do not remain owned by root.
+This profile provides a clean base for custom setups.
 
-## Installed Labwc configuration
+---
 
-This project installs the following files into `~/.config/labwc/`:
+### Extended Profile (default)
+
+A complete, ready-to-use desktop:
+
+* **Compositor**: labwc
+* **Bar**: waybar
+* **Launcher**: wofi
+* **Terminal**: foot
+* **File Manager**: pcmanfm
+* **Text Editor**: geany
+* **Browser**: librewolf
+* **Notifications**: mako
+* **Lock / Idle**: swayidle + swaylock
+* **Background**: swaybg
+* **Screenshots**: grim + slurp
+* **Audio control**: pavucontrol
+
+---
+
+## Installation
+
+Clone the repository:
+
+```
+git clone <repo>
+cd LabwcSetup
+```
+
+Build the tool:
+
+```
+go build -o labwcsetup
+```
+
+Run:
+
+```
+./labwcsetup
+```
+
+You will be prompted to select:
+
+* Minimal
+* Extended (default)
+
+---
+
+## System Requirements
+
+Ensure the following base services are enabled and running:
+
+```
+sysrc dbus_enable=YES
+sysrc seatd_enable=YES
+
+service dbus start
+service seatd start
+```
+
+---
+
+## User Configuration
+
+Add your user to the video group:
+
+```
+pw groupmod video -m $USER
+```
+
+Enable `pam_xdg`:
+
+Edit:
+
+```
+/etc/pam.d/system
+```
+
+Uncomment:
+
+```
+session optional pam_xdg.so
+```
+
+---
+
+## Running Labwc (GhostBSD / FreeBSD)
+
+Once configured, Labwc can be started directly from a TTY.
+
+### Start Labwc
+
+```
+labwc
+```
+
+No `sudo` is required.
+
+---
+
+## Configuration
+
+Labwc configuration is installed to:
+
+```
+~/.config/labwc/
+```
+
+This includes:
 
 * `rc.xml`
 * `menu.xml`
@@ -41,87 +139,98 @@ This project installs the following files into `~/.config/labwc/`:
 * `environment`
 * `backgrounds/dark_blue_bg.png`
 
-## Behavior of the shipped configuration
+If configuration is missing:
 
-### Key bindings
-
-* `W-Return` launches `foot`
-* `W-space` launches `wofi --show drun`
-* `W-e` launches `pcmanfm`
-* `W-b` launches `librewolf`
-* `W-t` launches `geany`
-* `W-l` launches `swaylock`
-
-### Autostart
-
-The autostart file does the following:
-
-* starts `mako`
-* starts `waybar`
-* starts `swaybg` with the bundled dark blue background
-* starts `swayidle`
-* locks the screen after 5 minutes
-* powers displays off after another 5 minutes with `wlopm`
-* restores displays on resume
-
-### Root menu
-
-The root menu includes:
-
-* browser
-* terminal
-* launcher
-* file manager
-* text editor
-* audio control with `pavucontrol`
-* screenshot capture
-* lock screen
-* bar start and stop
-* configuration editing entries
-* reconfigure action
-* exit Labwc
-
-The power submenu was removed because GhostBSD does not assume passwordless `sudo`, and the earlier `zzz` based entry was not appropriate as a default.
-
-## Build
-
-Install Go if it is not already present:
-
-```sh
-sudo pkg install go
+```
+cp -r configs/labwc ~/.config/
 ```
 
-Build LabwcSetup:
+---
 
-```sh
-go mod tidy
-go build -o LabwcSetup .
+## Autostart Behavior
+
+### Minimal Profile
+
+Starts only the compositor.
+
+No background services are launched.
+
+---
+
+### Extended Profile
+
+The default session starts:
+
+* waybar
+* mako
+* swaybg (dark blue background)
+* swayidle (screen lock and display power management)
+
+---
+
+## Menu
+
+The right-click root menu provides:
+
+* Application launchers (terminal, browser, file manager, editor)
+* Wofi launcher
+* Waybar control
+* Screenshot tools
+* Labwc configuration editing
+* Exit Labwc
+
+Notes:
+
+* Power management entries are intentionally removed for GhostBSD compatibility
+* Commands are executed via `sh -lc` for correct environment handling
+
+---
+
+## Screenshots
+
+Region screenshot:
+
+```
+grim -g "$(slurp)" ~/Pictures/Screenshots/screenshot.png
 ```
 
-## Run
+---
 
-Run as a normal user when possible:
+## Notes
 
-```sh
-./LabwcSetup
-```
+* `consolekit2` is not required and is intentionally omitted
+* If `XDG_RUNTIME_DIR` errors appear, verify `pam_xdg` is enabled
+* If the compositor fails to start, ensure:
 
-If you choose to invoke it with `sudo`, the installer will now place configuration in the invoking user's `~/.config/labwc` rather than `/root/.config/labwc`.
+  * `seatd` is running
+  * user is in `video` group
+* Configuration must exist in `~/.config/labwc/` or Labwc will fall back to defaults
 
-## Starting Labwc manually
+---
 
-After package installation and system setup, you can start Labwc from a TTY with:
+## Design Philosophy
 
-```sh
-ck-launch-session dbus-launch labwc
-```
+This setup follows a composable system model:
 
-If `pam_xdg` is enabled and the user is in the `video` group, Labwc should start without `sudo`.
+* minimal base (mechanism)
+* optional extensions (policy)
+* explicit configuration
 
-## Logs
+This reduces complexity and cognitive load while maintaining flexibility.
 
-Logs are written to:
+---
 
-```text
-/tmp/labwcsetup.log
-```
+## Future Direction
+
+Planned improvements:
+
+* additional profiles (developer, minimal GUI, etc.)
+* hardware validation integration
+* tighter GhostBSD integration
+* reproducible configuration bundles
+
+---
+
+## License
+
+BSD 2-Clause
